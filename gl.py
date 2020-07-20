@@ -72,11 +72,55 @@ class Render(object):
     def glVertex(self, x, y):
         ver_x = int(((x + 1) * (self.vp_width / 2)) + self.vp_x)
         ver_y = int(((y + 1) * (self.vp_height / 2)) + self.vp_y)
-        self.pixels[ver_x][ver_y] = self.current_color
+        self.pixels[round(ver_x)][round(ver_y)] = self.current_color
+
+    ##  this function is like glVertex bit instead it recieves coordinate pixels
+    def glVertex_coordinate(self, x, y):
+        self.pixels[x][y] = self.current_color
 
     ##  defines the color that will be used in glVertex
     def glColor(self, r, g, b):
         self.current_color = color(r, g, b)
+
+    ##  draws a straight line from (x0, y0) through (x1, y1)
+    def glLine(self, x0, y0, x1, y1):
+            x0 = round(( x0 + 1) * (self.vp_width  / 2 ) + self.vp_x)
+            x1 = round(( x1 + 1) * (self.vp_width  / 2 ) + self.vp_x)
+            y0 = round(( y0 + 1) * (self.vp_height / 2 ) + self.vp_y)
+            y1 = round(( y1 + 1) * (self.vp_height / 2 ) + self.vp_y)
+
+            dx = x1 - x0
+            dy = y1 - y0
+
+            steep = abs(dy) > abs(dx)
+
+            if steep:
+                x0, y0 = y0, x0
+                x1, y1 = y1, x1
+
+            if x0 > x1:
+                x0, x1 = x1, x0
+                y0, y1 = y1, y0
+
+            dx = abs(x1 - x0)
+            dy = abs(y1 - y0)
+
+            offset = 0
+            limit = 0.5
+            
+            m = dy/dx
+            y = y0
+
+            for x in range(x0, x1 + 1):
+                if(steep):
+                    self.glVertex_coordinate(y, x)
+                else:
+                    self.glVertex_coordinate(x, y)
+
+                offset += m
+                if offset >= limit:
+                    y += 1 if y0 < y1 else -1
+                    limit += 1
 
     ##  this function is used to write the image into the file
     def glFinish(self, filename):
